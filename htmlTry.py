@@ -151,7 +151,7 @@ def extractElements(html):
     data["last_updata_data"] = "now"
     print(data['question'])
     print(data['question_content'])
-    print(data[''])
+    print(data['number_of_answers'])
 
     with open('data.txt', 'w') as outfile:
         json.dump(data, outfile)
