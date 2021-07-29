@@ -28,5 +28,5 @@ data["last_updata_data"] = "now"
 
 
 
-with open('data.txt', 'w') as outfile:
+with open('example.txt', 'w') as outfile:
     json.dump(data, outfile)
