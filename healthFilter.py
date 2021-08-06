@@ -19,19 +19,22 @@ def targetFilter(targetStr, path):
 
     for name in scadndir:
         fileName = path + name.name
-
+        saveID = name.name.split('-')[1]
+        print(saveID)
         with open(fileName, 'rb') as stream:
 
             # iterate items in each file
             for record in ArchiveIterator(stream):
-
+                byteToStr = str(record.content_stream().read(), 'utf-8')
                 # if resource type is response, read the content
-                if record.rec_type == 'response' and int(record.rec_headers.get_header('Content-Length')) > 70000:
+                if '<!DOCTYPE html>' in byteToStr:
 
                     countInRepns += 1
-                    byteToStr = str(record.content_stream().read(), 'utf-8')
+
                     if targetStr in byteToStr:
-                        extractData.extractElements(byteToStr)
+                        url = record.rec_headers.get_header('WARC-Target-URI')
+                        extractData.extractElements(byteToStr, url, saveID, 'output_folder')
+
                         print(record.rec_headers.get_header('WARC-Target-URI'))
                         health.append(record.rec_headers.get_header('WARC-Target-URI'))
                         print(record.rec_headers.get_header('X-Wget-AT-Project-Item-Name'))
