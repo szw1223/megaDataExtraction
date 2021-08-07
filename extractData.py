@@ -20,6 +20,9 @@ saveID = 'asdfasdf09890'
 def extractElements(html, url, saveID, output_folder):
     soup = BeautifulSoup(html, 'html.parser')
 
+    # niubi = soup.find('button', attrs={'aria-label': "Thumbs down for this answer."}).find('span').get_text()
+    # print("!!!!!!!!!!!!!!!!!!!!!!$$$$$$$$$$$$$$$$$$$$$$$$%%%%%%%%%%%%%%%%")
+    # print(niubi)
     jsonList = soup.find_all(type="application/ld+json")
     strJson0 = str(jsonList[0])
     indexOf = strJson0.index('>') + 1
@@ -51,42 +54,53 @@ def extractElements(html, url, saveID, output_folder):
     for i in range(len_categories):
         data["categories"].append(JsonDict0["itemListElement"][i]["name"])
 
-        #{
-        # "answer_content": " Talk to your doctor about seeing a physical therapist ",
-        # "author_link": "https://answers.yahoo.com/activity/questions?show=WI2YP67BGBOQVXVOTMOMODMNTU&t=g",
-        # "author_name": "Patricia",
-        # "best": "true",
-        # "dislikes": '0',
-        # "likes": '0',
-        # "timestamp": "7/16/2018 2:37:30 AM UTC-4"},
-        # {"answer_content": " See a real doctor.",
-        # "author_link": "https://answers.yahoo.com/activity/questions?show=5MPNZ6HATCREEOFGKQZBKDRCPA&t=g",
-        # "author_name": "Mike G",
-        # "best": 'false',
-        # "dislikes": '0',
-        # "likes": '0',
-        # "timestamp": "7/15/2018 11:24:08 PM UTC-4"}
+
     data["answers"] = []
+    dict_author_link = {}
+    list_author_infor = soup.find_all('a', {'class': 'UserProfile__userName___1d1RW'})
+    for i in range(len(list_author_infor)):
+        dict_author_link[str(list_author_infor[i]).split('"')[4][1: -4]] = 'https://answers.yahoo.com' + str(list_author_infor[i]).split('"')[3]
+
+
 
     print("accepted!!!!!!!!!!!!!!!!!!!!!!!")
 
     try:
-        print(JsonDict1['mainEntity']['acceptedAnswer'])
         acceptedAnswer = JsonDict1['mainEntity']['acceptedAnswer']
-        answer_content = {
-            "answer_content": acceptedAnswer['text'],
-            # not found author_link
-            "author_link": "not found",
+        if acceptedAnswer['author']['name'] == 'Anonymous':
+            answer_content = {
+                "answer_content": acceptedAnswer['text'],
+                # not found author_link
 
-            "author_name": acceptedAnswer['author']['name'],
-            "best": "true",
+                "author_link": 'none',
 
-            # not found dislike
-            "dislikes": '0',
+                "author_name": 'Anonymous',
+                "best": "true",
 
-            "likes": acceptedAnswer['upvoteCount'],
-            "timestamp": acceptedAnswer['dateCreated']
-        }
+                # not found dislike
+                "dislikes": soup.find('button', attrs={'aria-label': "Thumbs down for this answer."}).find(
+                    'span').get_text(),
+
+                "likes": acceptedAnswer['upvoteCount'],
+                "timestamp": acceptedAnswer['dateCreated']
+            }
+        else:
+            answer_content = {
+                "answer_content": acceptedAnswer['text'],
+                # not found author_link
+
+                "author_link": dict_author_link[acceptedAnswer['author']['name']],
+
+                "author_name": acceptedAnswer['author']['name'],
+                "best": "true",
+
+                # not found dislike
+                "dislikes": soup.find('button', attrs={'aria-label': "Thumbs down for this answer."}).find(
+                    'span').get_text(),
+
+                "likes": acceptedAnswer['upvoteCount'],
+                "timestamp": acceptedAnswer['dateCreated']
+            }
         print('######################################################################')
         print(answer_content)
         data["answers"].append(answer_content)
@@ -95,32 +109,50 @@ def extractElements(html, url, saveID, output_folder):
     except:
         print('accepted doesnt exit!!!!!!!!!!!!!!!')
 
-
-
-
     print("suggested!!!!!!!!!!!!!!!!!!!!!!!")
+
+
     try:
-        print(JsonDict1['mainEntity']['suggestedAnswer'])
-        print(len(JsonDict1['mainEntity']['suggestedAnswer']))
-
         suggestedAnswer = JsonDict1['mainEntity']['suggestedAnswer']
-        num_suggest_answers = len(JsonDict1['mainEntity']['suggestedAnswer'])
-
+        # print(JsonDict1['mainEntity']['suggestedAnswer'])
+        # print(len(JsonDict1['mainEntity']['suggestedAnswer']))
+        num_suggest_answers = len(suggestedAnswer)
         for i in range(num_suggest_answers):
-            answer_content = {
-                "answer_content": suggestedAnswer[i]['text'],
-                # not found author_link
-                "author_link": "not found",
+            if suggestedAnswer[i]['author']['name'] == 'Anonymous':
 
-                "author_name": suggestedAnswer[i]['author']['name'],
-                "best": "false",
+                answer_content = {
+                    "answer_content": suggestedAnswer[i]['text'],
+                    # not found author_link
+                    "author_link": 'none',
 
-                # not found dislike
-                "dislikes": '0',
+                    "author_name": 'Anonymous',
+                    "best": "false",
 
-                "likes": suggestedAnswer[i]['upvoteCount'],
-                "timestamp": suggestedAnswer[i]['dateCreated']
-            }
+                    # not found dislike
+                    "dislikes": soup.find('button', attrs={'aria-label': "Thumbs down for this answer."}).find(
+                        'span').get_text(),
+
+                    "likes": suggestedAnswer[i]['upvoteCount'],
+                    "timestamp": suggestedAnswer[i]['dateCreated']
+                }
+            else:
+
+                answer_content = {
+                    "answer_content": suggestedAnswer[i]['text'],
+                    # not found author_link
+                    "author_link": dict_author_link[suggestedAnswer[i]['author']['name']],
+
+                    "author_name": suggestedAnswer[i]['author']['name'],
+                    "best": "false",
+
+                    # not found dislike
+                    "dislikes": soup.find('button', attrs={'aria-label': "Thumbs down for this answer."}).find(
+                        'span').get_text(),
+
+                    "likes": suggestedAnswer[i]['upvoteCount'],
+                    "timestamp": suggestedAnswer[i]['dateCreated']
+                }
+
             data["answers"].append(answer_content)
             print(data["answers"])
     except:
@@ -208,6 +240,7 @@ if __name__ == "__main__":
 # print(soup.find_all('ul')[0].find_all('li'))
 # print(soup.find('ul').find_all('li'))
 #
+
 
 
 #单个对象               <script type="application/ld+json">

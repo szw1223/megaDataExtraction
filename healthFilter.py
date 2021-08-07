@@ -4,11 +4,11 @@ import json
 import extractData
 
 
-def targetFilter(targetStr, path):
-    data = {}
+def targetFilter(targetStr, path, output_folder):
 
     # use os.scandir to scan each file
     scadndir = os.scandir(path)
+
     qIdList = []
     health = []
 
@@ -16,7 +16,6 @@ def targetFilter(targetStr, path):
     countInHealth = 0
 
     # open each file from 2400
-
     for name in scadndir:
         fileName = path + name.name
         saveID = name.name.split('-')[1]
@@ -33,7 +32,7 @@ def targetFilter(targetStr, path):
 
                     if targetStr in byteToStr:
                         url = record.rec_headers.get_header('WARC-Target-URI')
-                        extractData.extractElements(byteToStr, url, saveID, 'output_folder')
+                        extractData.extractElements(byteToStr, url, saveID, output_folder)
 
                         print(record.rec_headers.get_header('WARC-Target-URI'))
                         health.append(record.rec_headers.get_header('WARC-Target-URI'))
@@ -48,13 +47,13 @@ def targetFilter(targetStr, path):
     print(countInRepns)
     print(countInHealth)
 
-    with open('healthQuestion.txt', 'w') as outfile:
+    with open('healthQuestion.json', 'w') as outfile:
         json.dump(health, outfile)
 
-    with open('qIdList.txt', 'w') as outfile:
+    with open('qIdList.json', 'w') as outfile:
         json.dump(qIdList, outfile)
 
 if __name__ == "__main__":
-    targetPath = 'C:\\programming\\Python\\Project\\megaDataExtraction\\2000warcs\\'
+    targetPath = 'C:\\Users\\szw12\\Documents\\GitHub\\megaDataExtraction\\2000warcs\\'
     target = '<a href="https://answers.yahoo.com/dir/index?sid=396545018">'
-    targetFilter(target, targetPath)
+    targetFilter(target, targetPath, 'output_folder')
