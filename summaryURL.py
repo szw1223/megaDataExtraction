@@ -13,11 +13,11 @@ def summaryURLs(path, output_folder):
     # open each file from 2400
     for name in scadndir:
         fileName = path + name.name
-        saveID = name.name.split('-')
-        print(saveID)
+        saveID = name.name.split('-')[1]
+
 
         with open(fileName, 'rb') as stream:
-
+            i = 0
             # iterate items in each file
             for record in ArchiveIterator(stream):
 
@@ -25,6 +25,11 @@ def summaryURLs(path, output_folder):
                 urls.append(url)
                 if 'https://trimurl.im' in url or 'http://www-groups.dcs.st-and.ac.uk' in url:
                     print(saveID)
+                    byteToStr = str(record.content_stream().read(), 'utf-8')
+                    with open(saveID + str(i) + '.html', 'wb') as f:
+                        f.write(bytes(byteToStr, encoding="utf8"))
+                        f.close()
+                    i += 1
 
     dataframe = pd.DataFrame({'url': urls})
     dataframe.to_csv("urls01.csv", index=False, sep=',')
