@@ -6,6 +6,7 @@ from html.entities import name2codepoint
 from bs4 import BeautifulSoup
 import json
 
+# sample dataset
 html0 = '''<!DOCTYPE html><html lang="en-US"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1"/><meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=2"/><title>Something stung me at the beach? Not a jellyfish!? | Yahoo Answers</title><link rel="canonical" href="https://answers.yahoo.com/question/index?qid=20130324233047AAyzVOy"/><link rel="amphtml" href="https://answers.yahoo.com/amp/qna/20130324233047AAyzVOy"/><meta name="description" content="I was swimming in the becah with my dad and then a wave comes and after it passes ( it went into me) i feel this  tiny but burning/stinging on my arm! I cant see anything and its only in one spot. I got this a while ago and whenever i go to the beach? What is it? Was it a jellyfish? Or something else? I cannot see a thing on my arm and it went away after like 20 minutes? What was it?
 
  Thankyou!"/><meta property="og:site_name" content="Yahoo Answers"/><meta property="og:image" content="https://s.yimg.com/cv/apiv2/social/images/yahoo_default_logo.png"/><meta property="og:image:width" content="500"/><meta property="og:image:height" content="500"/><meta property="og:title" content="Something stung me at the beach? Not a jellyfish!? | Yahoo Answers"/><meta property="og:type" content="website"/><meta property="og:locale" content="zh_TW"/><meta property="og:url" content="https://answers.yahoo.com/question/index?qid=20130324233047AAyzVOy"/><meta property="og:description" content="I was swimming in the becah with my dad and then a wave comes and after it passes ( it went into me) i feel this  tiny but burning/stinging on my arm! I cant see anything and its only in one spot. I got this a while ago and whenever i go to the beach? What is it? Was it a jellyfish? Or something else? I cannot see a thing on my arm and it went away after like 20 minutes? What was it?
@@ -17,12 +18,12 @@ url = 'https://answers.yahoo.com/question/index?qid=20100710155346AASEyRG'
 qid = url[-21: -7]
 print(qid)
 saveID = 'asdfasdf09890'
+
+
 def extractElements(html, url, saveID, output_folder):
     soup = BeautifulSoup(html, 'html.parser')
 
-    # niubi = soup.find('button', attrs={'aria-label': "Thumbs down for this answer."}).find('span').get_text()
-    # print("!!!!!!!!!!!!!!!!!!!!!!$$$$$$$$$$$$$$$$$$$$$$$$%%%%%%%%%%%%%%%%")
-    # print(niubi)
+
     jsonList = soup.find_all(type="application/ld+json")
     strJson0 = str(jsonList[0])
     indexOf = strJson0.index('>') + 1
@@ -54,14 +55,11 @@ def extractElements(html, url, saveID, output_folder):
     for i in range(len_categories):
         data["categories"].append(JsonDict0["itemListElement"][i]["name"])
 
-
     data["answers"] = []
     dict_author_link = {}
     list_author_infor = soup.find_all('a', {'class': 'UserProfile__userName___1d1RW'})
     for i in range(len(list_author_infor)):
         dict_author_link[str(list_author_infor[i]).split('"')[4][1: -4]] = 'https://answers.yahoo.com' + str(list_author_infor[i]).split('"')[3]
-
-
 
     print("accepted!!!!!!!!!!!!!!!!!!!!!!!")
 
@@ -70,34 +68,22 @@ def extractElements(html, url, saveID, output_folder):
         if acceptedAnswer['author']['name'] == 'Anonymous':
             answer_content = {
                 "answer_content": acceptedAnswer['text'],
-                # not found author_link
-
                 "author_link": 'none',
-
                 "author_name": 'Anonymous',
                 "best": "true",
-
-                # not found dislike
                 "dislikes": soup.find('button', attrs={'aria-label': "Thumbs down for this answer."}).find(
                     'span').get_text(),
-
                 "likes": acceptedAnswer['upvoteCount'],
                 "timestamp": acceptedAnswer['dateCreated']
             }
         else:
             answer_content = {
                 "answer_content": acceptedAnswer['text'],
-                # not found author_link
-
                 "author_link": dict_author_link[acceptedAnswer['author']['name']],
-
                 "author_name": acceptedAnswer['author']['name'],
                 "best": "true",
-
-                # not found dislike
                 "dislikes": soup.find('button', attrs={'aria-label': "Thumbs down for this answer."}).find(
                     'span').get_text(),
-
                 "likes": acceptedAnswer['upvoteCount'],
                 "timestamp": acceptedAnswer['dateCreated']
             }
@@ -108,9 +94,7 @@ def extractElements(html, url, saveID, output_folder):
         print(len(JsonDict1['mainEntity']['acceptedAnswer']['text']))
     except:
         print('accepted doesnt exit!!!!!!!!!!!!!!!')
-
     print("suggested!!!!!!!!!!!!!!!!!!!!!!!")
-
 
     try:
         suggestedAnswer = JsonDict1['mainEntity']['suggestedAnswer']
@@ -122,13 +106,9 @@ def extractElements(html, url, saveID, output_folder):
 
                 answer_content = {
                     "answer_content": suggestedAnswer[i]['text'],
-                    # not found author_link
                     "author_link": 'none',
-
                     "author_name": 'Anonymous',
                     "best": "false",
-
-                    # not found dislike
                     "dislikes": soup.find('button', attrs={'aria-label': "Thumbs down for this answer."}).find(
                         'span').get_text(),
 
@@ -139,13 +119,9 @@ def extractElements(html, url, saveID, output_folder):
 
                 answer_content = {
                     "answer_content": suggestedAnswer[i]['text'],
-                    # not found author_link
                     "author_link": dict_author_link[suggestedAnswer[i]['author']['name']],
-
                     "author_name": suggestedAnswer[i]['author']['name'],
                     "best": "false",
-
-                    # not found dislike
                     "dislikes": soup.find('button', attrs={'aria-label': "Thumbs down for this answer."}).find(
                         'span').get_text(),
 
